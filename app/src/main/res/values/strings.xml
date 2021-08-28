@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Corona Inzidenzen</string>
+    <string name="stadtkreis">Stadtkreis</string>
+    <string name="landkreis">Landkreis</string>
+    <string name="bundesland">Bundesland</string>
+    <string name="enter_location">Landkreis/Stadtkreis/Bundesland</string>
+    <string name="send">Abfragen</string>
+    <string name="error_wrongType">Der ausgewählte Typ konnte nicht zugeordnet werden</string>
+    <string name="click_to_start">Klicke um zu starten</string>
+    <string name="click_to_start_abfrage">Name eingeben und auf \"Abfrage\" drücken</string>
+    <string name="error_cant_find_landkreis">Fehler: Landkreis konnte nicht gefunden werden</string>
+    <string name="error_cant_find_stadtkreis">Fehler: Stadtkreis konnte nicht gefunden werden</string>
+    <string name="error_cant_find_bundesland">Fehler: Bundesland konnte nicht gefunden werden</string>
+    <string name="error_no_connection">Keine Internetverbindung verfügbar</string>
+    <string name="data_quelle_rki">Quelle: Robert Koch-Institut (RKI), dl-de/by-2-0</string>
+    <string name="developed_by">Entwickelt von Luki2811</string>
+    <string name="title_activity_drawer">Drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+
+</resources>
