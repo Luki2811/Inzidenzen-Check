@@ -13,6 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CoronaInzidenzen">
         <activity
+            android:name=".Quellen"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"/>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">

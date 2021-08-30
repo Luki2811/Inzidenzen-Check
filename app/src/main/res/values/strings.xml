@@ -13,17 +13,13 @@
     <string name="error_cant_find_bundesland">Fehler: Bundesland konnte nicht gefunden werden</string>
     <string name="error_no_connection">Keine Internetverbindung verfügbar</string>
     <string name="data_quelle_rki">Quelle: Robert Koch-Institut (RKI), dl-de/by-2-0</string>
+    <string name="app_version">v.0.3.1</string>
     <string name="developed_by">Entwickelt von Luki2811</string>
-    <string name="title_activity_drawer">Drawer</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
-
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
+    <string name="save">Speichern</string>
+    <string name="settings">Einstellungen</string>
+    <string name="settings_loadOldRequest">Letzte Abfrage automatisch einfügen</string>
+    <string name="open_licences">Open-Source-Lizenzen</string>
+    <string name="other">Sonstiges</string>
+    <string name="third_party_notices">Hinweise von Drittanbietern</string>
 
 </resources>

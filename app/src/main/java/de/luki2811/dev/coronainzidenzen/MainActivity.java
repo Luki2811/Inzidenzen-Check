@@ -2,6 +2,7 @@ package de.luki2811.dev.coronainzidenzen;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,36 +30,51 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         File file = new File(getApplicationContext().getFilesDir(),fileName);
+        Datein datei = new Datein(fileName);
+
         if(file.exists()){
-            EditText inputText = findViewById(R.id.textInput);
-            RadioButton radio_lk = findViewById(R.id.radioButton_landkreis);
-            RadioButton radio_sk = findViewById(R.id.radioButton_stadtkreis);
-            RadioButton radio_bl = findViewById(R.id.radioButton_bundesland);
-
-            JSONObject json;
-            String oldLocation = null;
-            int oldType = -1;
-            Datein dfile = new Datein(fileName);
+            JSONObject jsonTEMP;
+            boolean setOld = true;
             try {
-                json = new JSONObject(dfile.loadFromFile(this));
-                oldLocation = json.getString("oldLocation");
-                oldType = json.getInt("oldType");
-
+                jsonTEMP = new JSONObject(datei.loadFromFile(this));
+                setOld = jsonTEMP.getBoolean("automaticPlaceInput");
             } catch (JSONException e) {
                 e.printStackTrace();
+
             }
-            if(oldType == Corona.LANDKREIS){
-                radio_bl.setChecked(false);
-                radio_lk.setChecked(true);
+            if(setOld){
+                EditText inputText = findViewById(R.id.textInput);
+                RadioButton radio_lk = findViewById(R.id.radioButton_landkreis);
+                RadioButton radio_sk = findViewById(R.id.radioButton_stadtkreis);
+                RadioButton radio_bl = findViewById(R.id.radioButton_bundesland);
 
-            }else if(oldType == Corona.STADTKREIS){
-                radio_bl.setChecked(false);
-                radio_sk.setChecked(true);
-            }else
-                radio_bl.setChecked(true);
+                JSONObject json;
+                String oldLocation = null;
+                int oldType = -1;
+                Datein dfile = new Datein(fileName);
+                try {
+                    json = new JSONObject(dfile.loadFromFile(this));
+                    oldLocation = json.getString("oldLocation");
+                    oldType = json.getInt("oldType");
 
-            inputText.setText(oldLocation);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if(oldType == Corona.LANDKREIS){
+                    radio_bl.setChecked(false);
+                    radio_lk.setChecked(true);
+
+                }else if(oldType == Corona.STADTKREIS){
+                    radio_bl.setChecked(false);
+                    radio_sk.setChecked(true);
+                }else
+                    radio_bl.setChecked(true);
+
+                inputText.setText(oldLocation);
+            }
+
         }
 
     }
@@ -88,6 +106,43 @@ public class MainActivity extends AppCompatActivity {
         TextView textView_inzidenz = findViewById(R.id.textInzidenz);
 
         String location = inputText.getText().toString();
+
+        // Abkürzungen nach https://www.destatis.de/DE/Methoden/abkuerzung-bundeslaender-DE-EN.html
+
+        if (location.equalsIgnoreCase("bw"))
+            location = "Baden-Württemberg";
+        if (location.equalsIgnoreCase("by"))
+            location = "Bayern";
+        if (location.equalsIgnoreCase("be"))
+            location = "Berlin";
+        if (location.equalsIgnoreCase("bb"))
+            location = "Brandenburg";
+        if (location.equalsIgnoreCase("hb"))
+            location = "Bremen";
+        if (location.equalsIgnoreCase("hh"))
+            location = "Hamburg";
+        if (location.equalsIgnoreCase("he"))
+            location = "Hessen";
+        if (location.equalsIgnoreCase("mv"))
+            location = "Mecklenburg-Vorpommern";
+        if (location.equalsIgnoreCase("ni"))
+            location = "Niedersachsen";
+        if (location.equalsIgnoreCase("nrw") || location.equalsIgnoreCase("nw"))
+            location = "Nordrhein-Westfalen";
+        if (location.equalsIgnoreCase("rp"))
+            location = "Rheinland-Pfalz";
+        if (location.equalsIgnoreCase("sl"))
+            location = "Saarland";
+        if (location.equalsIgnoreCase("sn"))
+            location = "Sachsen";
+        if (location.equalsIgnoreCase("st"))
+            location = "Sachsen-Anhalt";
+        if (location.equalsIgnoreCase("sh"))
+            location = "Schleswig-Holstein";
+        if (location.equalsIgnoreCase("th"))
+            location = "Thüringen";
+
+
         int type = -1;
 
         if(radioGroup.getCheckedRadioButtonId() == R.id.radioButton_bundesland)
@@ -100,11 +155,11 @@ public class MainActivity extends AppCompatActivity {
         Corona corona = null;
         if(availableConnection()){
             try {
+                Datein file = new Datein(fileName);
                 corona = new Corona(location, type);
-                JSONObject jsonInFile = new JSONObject();
+                JSONObject jsonInFile = new JSONObject(file.loadFromFile(this));
                 jsonInFile.put("oldLocation", location);
                 jsonInFile.put("oldType", type);
-                Datein file = new Datein(fileName);
                 file.writeInFile(jsonInFile.toString(), this);
             } catch (JSONException e) {
                 if(type == Corona.LANDKREIS)
@@ -138,7 +193,9 @@ public class MainActivity extends AppCompatActivity {
         }else{
             output.setText(getResources().getString(R.string.error_no_connection));
         }
-
-
+    }
+    public void openSettings(View view){
+        Intent intent = new Intent(this, Quellen.class);
+        startActivity(intent);
     }
 }
