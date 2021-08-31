@@ -8,28 +8,54 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Switch;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.Locale;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
+    int type = 0;
+
     final static String fileName = "settings.json";
+    final static String fileNameDataKreise = "data_kreise.json";
+    final static String fileNameDataBundeslaender = "data_bundeslaender.json";
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        URL urlLand = null, urlBund = null;
+
+        try {
+            urlLand = new URL("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=GEN,cases7_per_100k,county&returnGeometry=false&outSR=4326&f=json");
+            urlBund = new URL("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=cases7_bl_per_100k,LAN_ew_GEN&returnGeometry=false&outSR=4326&f=json");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        InternetRequest land = new InternetRequest(urlLand, this, fileNameDataKreise);
+        land.start();
+        InternetRequest bund = new InternetRequest(urlBund, this, fileNameDataBundeslaender);
+        bund.start();
 
         File file = new File(getApplicationContext().getFilesDir(),fileName);
         Datein datei = new Datein(fileName);
@@ -49,10 +75,10 @@ public class MainActivity extends AppCompatActivity {
                 RadioButton radio_lk = findViewById(R.id.radioButton_landkreis);
                 RadioButton radio_sk = findViewById(R.id.radioButton_stadtkreis);
                 RadioButton radio_bl = findViewById(R.id.radioButton_bundesland);
-
+                int oldType = -1;
                 JSONObject json;
                 String oldLocation = null;
-                int oldType = -1;
+
                 Datein dfile = new Datein(fileName);
                 try {
                     json = new JSONObject(dfile.loadFromFile(this));
@@ -65,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
                 if(oldType == Corona.LANDKREIS){
                     radio_bl.setChecked(false);
                     radio_lk.setChecked(true);
-
                 }else if(oldType == Corona.STADTKREIS){
                     radio_bl.setChecked(false);
                     radio_sk.setChecked(true);
@@ -74,9 +99,103 @@ public class MainActivity extends AppCompatActivity {
 
                 inputText.setText(oldLocation);
             }
+            RadioButton radio_lk = findViewById(R.id.radioButton_landkreis);
+            RadioButton radio_sk = findViewById(R.id.radioButton_stadtkreis);
+            RadioButton radio_bl = findViewById(R.id.radioButton_bundesland);
+            if(radio_bl.isChecked())
+                type = Corona.BUNDESLAND;
+            if(radio_lk.isChecked())
+                type = Corona.LANDKREIS;
+            if(radio_sk.isChecked())
+                type = Corona.STADTKREIS;
+            setAutoCompleteList(type);
 
         }
+    }
 
+    public void setType(int type) {
+        this.type = type;
+    }
+
+
+    public void onClickRadioButtons(View view){
+        int type = 0;
+        RadioButton radio_lk = findViewById(R.id.radioButton_landkreis);
+        RadioButton radio_sk = findViewById(R.id.radioButton_stadtkreis);
+        RadioButton radio_bl = findViewById(R.id.radioButton_bundesland);
+        if(radio_bl.isChecked())
+            type = Corona.BUNDESLAND;
+        if(radio_lk.isChecked())
+            type = Corona.LANDKREIS;
+        if(radio_sk.isChecked())
+            type = Corona.STADTKREIS;
+        setAutoCompleteList(type);
+    }
+
+    public void setAutoCompleteList(int type) {
+        String[] list = null;
+        System.out.println("setAuto: "+type);
+        if(type == Corona.BUNDESLAND){
+            Datein fileBund = new Datein(fileNameDataBundeslaender);
+            System.out.println("Inhalt: " + fileBund.loadFromFile(this));
+            try {
+                JSONArray jsonArrayBund = new JSONObject(fileBund.loadFromFile(this)).getJSONArray("features");
+                System.out.println(jsonArrayBund.toString());
+                int length = jsonArrayBund.length();
+
+                list = new String[length];
+                for(int i = 0; i < jsonArrayBund.length(); i++){
+                    list[i] = jsonArrayBund.getJSONObject(i).getJSONObject("attributes").getString("LAN_ew_GEN");
+                }
+
+                System.out.println(Arrays.toString(list));
+
+                for(int i = 0; i < length -1 ; i++){
+                    if(list[i] == null){
+                        System.out.println("BL null at "+ i);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        if(type == Corona.LANDKREIS || type == Corona.STADTKREIS){
+            Datein fileLand = new Datein(fileNameDataKreise);
+            try {
+                JSONArray jsonArrayLand = new JSONObject(fileLand.loadFromFile(this)).getJSONArray("features");
+
+                int length = jsonArrayLand.length();
+
+                list = new String[length];
+                for (int i = 0; i < jsonArrayLand.length(); i++) {
+                    String SkOrLk = jsonArrayLand.getJSONObject(i).getJSONObject("attributes").getString("county");
+                    if(SkOrLk.contains("SK") && type == Corona.STADTKREIS)
+                        list[i] = jsonArrayLand.getJSONObject(i).getJSONObject("attributes").getString("county").replaceAll("SK ","");
+                    if(SkOrLk.contains("LK") && type == Corona.LANDKREIS)
+                        list[i] = jsonArrayLand.getJSONObject(i).getJSONObject("attributes").getString("county").replaceAll("LK ","");
+                }
+
+                List<String> liste = new ArrayList<>();
+
+                for(String s : list) {
+                    if(s != null && s.length() > 0) {
+                        liste.add(s);
+                    }
+                }
+                list = new String[liste.size()];
+                liste.toArray(list);
+            }
+            catch(JSONException e){
+                e.printStackTrace();
+            }
+        }
+
+
+
+        AutoCompleteTextView autoTextView = findViewById(R.id.textInput);
+        System.out.print(Arrays.toString(list));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list);
+        autoTextView.setAdapter(adapter);
     }
 
     public boolean availableConnection(){
@@ -154,23 +273,33 @@ public class MainActivity extends AppCompatActivity {
 
         Corona corona = null;
         if(availableConnection()){
+            Datein file = new Datein(fileName);
             try {
-                Datein file = new Datein(fileName);
-                corona = new Corona(location, type);
-                JSONObject jsonInFile = new JSONObject(file.loadFromFile(this));
-                jsonInFile.put("oldLocation", location);
-                jsonInFile.put("oldType", type);
-                file.writeInFile(jsonInFile.toString(), this);
+                corona = new Corona(location, type, this);
             } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if(corona.getLocation() == null){
                 if(type == Corona.LANDKREIS)
                     Toast.makeText(this, getResources().getString(R.string.error_cant_find_landkreis) , Toast.LENGTH_LONG).show();
-                if(type == Corona.STADTKREIS)
+                else if(type == Corona.STADTKREIS)
                     Toast.makeText(this, getResources().getString(R.string.error_cant_find_stadtkreis), Toast.LENGTH_LONG).show();
-                if(type == Corona.BUNDESLAND)
+                else if(type == Corona.BUNDESLAND)
                     Toast.makeText(this, getResources().getString(R.string.error_cant_find_bundesland), Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(this,getResources().getString(R.string.error_analysis), Toast.LENGTH_LONG).show();
             }
-
-            if (corona != null) {
+            else if (corona != null) {
+                // set settings
+                JSONObject jsonInFile = null;
+                try {
+                    jsonInFile = new JSONObject(file.loadFromFile(this));
+                    jsonInFile.put("oldLocation", location);
+                    jsonInFile.put("oldType", type);
+                    file.writeInFile(jsonInFile.toString(), this);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 // set text
                 output.setText(corona.getLocation() + " hat eine Coronainzidenz von:");
                 textView_inzidenz.setText("" + corona.getIncidence() + "");

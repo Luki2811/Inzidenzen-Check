@@ -1,5 +1,7 @@
 package de.luki2811.dev.coronainzidenzen;
 
+import android.content.Context;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,13 +17,25 @@ public class InternetRequest extends Thread {
 
     URL url;
     JSONObject jsonObject;
+    Context context;
+    String fileName;
 
-    InternetRequest(URL url){
+    InternetRequest(URL url, Context context, String fileName){
         setUrl(url);
+        setContext(context);
+        setFileName(fileName);
     }
 
     public void setUrl(URL url) {
         this.url = url;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public void setJsonObject(JSONObject jsonObject) {
@@ -37,6 +51,8 @@ public class InternetRequest extends Thread {
     public void run() {
         setJsonObject(getJSONfromURL(url));
         System.out.println("run(): " + jsonObject);
+        Datein file = new Datein(fileName);
+        file.writeInFile(jsonObject.toString(), context);
     }
     public static JSONObject getJSONfromURL(URL url) {
         JSONObject jsonObject = null;

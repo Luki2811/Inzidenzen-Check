@@ -22,32 +22,36 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:checked="true"
+            android:onClick="onClickRadioButtons"
             android:text="@string/bundesland" />
+
 
 
         <RadioButton
             android:id="@+id/radioButton_landkreis"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-
+            android:onClick="onClickRadioButtons"
             android:text="@string/landkreis" />
 
         <RadioButton
             android:id="@+id/radioButton_stadtkreis"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:onClick="onClickRadioButtons"
             android:text="@string/stadtkreis" />
 
     </RadioGroup>
 
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/textInput"
         android:layout_width="0dp"
         android:layout_height="57dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
+        android:completionThreshold="0"
         android:ems="10"
         android:hint="@string/enter_location"
         android:importantForAutofill="no"

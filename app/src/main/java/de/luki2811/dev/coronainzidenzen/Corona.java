@@ -1,10 +1,15 @@
 package de.luki2811.dev.coronainzidenzen;
 
+import android.content.Context;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class Corona {
     final static int LANDKREIS = 0;
@@ -22,58 +27,45 @@ public class Corona {
         return incidence;
     }
 
-    public Corona(String str, int type) throws JSONException {
-        str.toLowerCase().replaceAll(" ", "%20").replaceAll("landkreis", "lk").replaceAll("stadtkreis", "sk").replaceAll("\u00e4", "%C3%A4").replaceAll("\u00f6", "%C3%B6").replaceAll("\u00fc", "%C3%BC");
+    public Corona(String str, int type, Context context) throws JSONException {
+        str = str.toLowerCase().trim();
         System.out.println(str);
         String location;
+        Datein file;
         if(type == LANDKREIS || type == STADTKREIS){
             if (type == LANDKREIS)
                 location = "lk " + str;
             else
                 location = "sk " + str;
-
-            URL url = null;
+            file = new Datein(MainActivity.fileNameDataKreise);
             try {
-                url = new URL("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=county%20%3D%20'" + location + "'&outFields=cases7_per_100k,county&returnGeometry=false&returnDistinctValues=true&outSR=4326&f=json");
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            try {
-                JSONObject jsonObject;
-                InternetRequest t = new InternetRequest(url);
-                t.start();
-                Thread.sleep(3000);
-                jsonObject = t.getJsonObject();
-                String incidenceTEMP = jsonObject.getJSONArray("features").getJSONObject(0).getJSONObject("attributes").getString("cases7_per_100k");
-                this.incidence = MainActivity.round(Double.parseDouble(incidenceTEMP),2);
-                this.location = jsonObject.getJSONArray("features").getJSONObject(0).getJSONObject("attributes").getString("county");
-            }catch (InterruptedException | NullPointerException e){
+                JSONArray jsonArray = new JSONObject(file.loadFromFile(context)).getJSONArray("features");
+                for (int i = 0; i < jsonArray.length(); i++){
+                    if(location.equalsIgnoreCase(jsonArray.getJSONObject(i).getJSONObject("attributes").getString("county"))){
+                         this.location = jsonArray.getJSONObject(i).getJSONObject("attributes").getString("county");
+                         this.incidence = MainActivity.round(Double.parseDouble(jsonArray.getJSONObject(i).getJSONObject("attributes").getString("cases7_per_100k")),2);
+                    }
+                }
+            }catch (NullPointerException e){
                 e.printStackTrace();
             }
         } else {
-            URL url;
             location = str;
-            try {
-                url = new URL("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=LAN_ew_GEN%20%3D%20'" + location + "'&outFields=LAN_ew_GEN,cases7_bl_per_100k&returnGeometry=false&outSR=4326&f=json");
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                url = null;
-            }
-            try {
-                JSONObject jsonObject;
-                InternetRequest t = new InternetRequest(url);
-                t.start();
-                Thread.sleep(3000);
-                jsonObject = t.getJsonObject();
-                String incidenceTEMP = jsonObject.getJSONArray("features").getJSONObject(0).getJSONObject("attributes").getString("cases7_bl_per_100k");
-                this.incidence = MainActivity.round(Double.parseDouble(incidenceTEMP),2);
-                this.location = jsonObject.getJSONArray("features").getJSONObject(0).getJSONObject("attributes").getString("LAN_ew_GEN");
 
-            } catch (InterruptedException | NullPointerException e) {
+            file = new Datein(MainActivity.fileNameDataBundeslaender);
+
+            try {
+                JSONArray jsonArray = new JSONObject(file.loadFromFile(context)).getJSONArray("features");
+                for (int i = 0; i < jsonArray.length(); i++){
+                    if(location.equalsIgnoreCase(jsonArray.getJSONObject(i).getJSONObject("attributes").getString("LAN_ew_GEN"))){
+                        this.location = jsonArray.getJSONObject(i).getJSONObject("attributes").getString("LAN_ew_GEN");
+                        this.incidence = MainActivity.round(Double.parseDouble(jsonArray.getJSONObject(i).getJSONObject("attributes").getString("cases7_bl_per_100k")),2);
+                    }
+                }
+            }catch (NullPointerException e){
                 e.printStackTrace();
             }
         }
-
     }
 }
 
