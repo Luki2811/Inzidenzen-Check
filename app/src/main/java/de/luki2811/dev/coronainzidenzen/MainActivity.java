@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -46,16 +47,30 @@ public class MainActivity extends AppCompatActivity {
 
         URL urlLand = null, urlBund = null;
 
-        try {
-            urlLand = new URL("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=GEN,cases7_per_100k,county&returnGeometry=false&outSR=4326&f=json");
-            urlBund = new URL("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=cases7_bl_per_100k,LAN_ew_GEN&returnGeometry=false&outSR=4326&f=json");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        if(availableConnection()){
+            try {
+                urlLand = new URL("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=cases7_per_100k,county&returnGeometry=false&outSR=4326&f=json");
+                urlBund = new URL("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=cases7_bl_per_100k,LAN_ew_GEN&returnGeometry=false&outSR=4326&f=json");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            InternetRequest land = new InternetRequest(urlLand, this, fileNameDataKreise);
+            land.start();
+            InternetRequest bund = new InternetRequest(urlBund, this, fileNameDataBundeslaender);
+            bund.start();
+            try {
+                bund.join();
+                land.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else{
+            Toast.makeText(this,getResources().getString(R.string.error_cant_load_data), Toast.LENGTH_LONG).show();
+            TextView output = findViewById(R.id.textOutput);
+            output.setText(getResources().getString(R.string.error_no_connection) + "\n" + getResources().getString(R.string.error_app_restart_to_update));
+            Button sendButton = findViewById(R.id.button);
+            sendButton.setEnabled(false);
         }
-        InternetRequest land = new InternetRequest(urlLand, this, fileNameDataKreise);
-        land.start();
-        InternetRequest bund = new InternetRequest(urlBund, this, fileNameDataBundeslaender);
-        bund.start();
 
         File file = new File(getApplicationContext().getFilesDir(),fileName);
         Datein datei = new Datein(fileName);
@@ -291,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (corona != null) {
                 // set settings
-                JSONObject jsonInFile = null;
+                JSONObject jsonInFile;
                 try {
                     jsonInFile = new JSONObject(file.loadFromFile(this));
                     jsonInFile.put("oldLocation", location);

@@ -1,6 +1,7 @@
 package de.luki2811.dev.coronainzidenzen;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,9 +49,8 @@ public class InternetRequest extends Thread {
 
 
     @Override
-    public void run() {
+    public void run(){
         setJsonObject(getJSONfromURL(url));
-        System.out.println("run(): " + jsonObject);
         Datein file = new Datein(fileName);
         file.writeInFile(jsonObject.toString(), context);
     }
