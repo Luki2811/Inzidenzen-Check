@@ -1,4 +1,4 @@
-package de.luki2811.dev.coronainzidenzen;
+package de.luki2811.dev.inzidenzencheck;
 
 import android.app.Application;
 import android.content.Context;

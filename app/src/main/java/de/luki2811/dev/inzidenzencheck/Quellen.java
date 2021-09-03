@@ -1,9 +1,8 @@
-package de.luki2811.dev.coronainzidenzen;
+package de.luki2811.dev.inzidenzencheck;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.view.View;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,8 +22,8 @@ public class Quellen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quellen);
 
-        File file = new File(getApplicationContext().getFilesDir(),MainActivity.fileName);
-        Datein datei = new Datein(MainActivity.fileName);
+        File file = new File(getApplicationContext().getFilesDir(),MainActivity.fileNameSettings);
+        Datein datei = new Datein(MainActivity.fileNameSettings);
         Switch settings_switch_0 = findViewById(R.id.settings_switch_0);
         if(file.exists()){
             try {
@@ -52,14 +50,13 @@ public class Quellen extends AppCompatActivity {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://dev.luki2811.de/coronaInzidenzen/thirt-party-licenses.html"));
             startActivity(browserIntent);
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "No application can handle this request."
-                    + " Please install a webbrowser",  Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No application can handle this request." + " Please install a webbrowser",  Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
 
     public void saveSettings(View view){
-        Datein datein = new Datein(MainActivity.fileName);
+        Datein datein = new Datein(MainActivity.fileNameSettings);
         String oldJSON = datein.loadFromFile(this);
 
         Switch settings_switch_0 = findViewById(R.id.settings_switch_0);

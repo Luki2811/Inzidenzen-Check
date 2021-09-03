@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Corona Inzidenzen</string>
+    <string name="app_name">Inzidenzen Check</string>
     <string name="stadtkreis">Stadtkreis</string>
     <string name="landkreis">Landkreis</string>
     <string name="bundesland">Bundesland</string>

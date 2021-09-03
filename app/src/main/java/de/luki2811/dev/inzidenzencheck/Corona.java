@@ -1,15 +1,10 @@
-package de.luki2811.dev.coronainzidenzen;
+package de.luki2811.dev.inzidenzencheck;
 
 import android.content.Context;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 public class Corona {
     final static int LANDKREIS = 0;

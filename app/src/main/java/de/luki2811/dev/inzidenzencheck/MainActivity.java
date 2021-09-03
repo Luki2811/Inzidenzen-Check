@@ -1,9 +1,7 @@
-package de.luki2811.dev.coronainzidenzen;
+package de.luki2811.dev.inzidenzencheck;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -36,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     int type = 0;
 
-    final static String fileName = "settings.json";
+    final static String fileNameSettings = "settings.json";
     final static String fileNameDataKreise = "data_kreise.json";
     final static String fileNameDataBundeslaender = "data_bundeslaender.json";
 
@@ -72,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
             sendButton.setEnabled(false);
         }
 
-        File file = new File(getApplicationContext().getFilesDir(),fileName);
-        Datein datei = new Datein(fileName);
+        File file = new File(getApplicationContext().getFilesDir(), fileNameSettings);
+        Datein datei = new Datein(fileNameSettings);
 
         if(file.exists()){
             JSONObject jsonTEMP;
@@ -94,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject json;
                 String oldLocation = null;
 
-                Datein dfile = new Datein(fileName);
+                Datein dfile = new Datein(fileNameSettings);
                 try {
                     json = new JSONObject(dfile.loadFromFile(this));
                     oldLocation = json.getString("oldLocation");
@@ -152,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("setAuto: "+type);
         if(type == Corona.BUNDESLAND){
             Datein fileBund = new Datein(fileNameDataBundeslaender);
-            System.out.println("Inhalt: " + fileBund.loadFromFile(this));
             try {
                 JSONArray jsonArrayBund = new JSONObject(fileBund.loadFromFile(this)).getJSONArray("features");
                 System.out.println(jsonArrayBund.toString());
@@ -165,9 +162,10 @@ public class MainActivity extends AppCompatActivity {
 
                 System.out.println(Arrays.toString(list));
 
+                // Shows null positions
                 for(int i = 0; i < length -1 ; i++){
                     if(list[i] == null){
-                        System.out.println("BL null at "+ i);
+                        System.err.println("BL null at "+ i);
                     }
                 }
             } catch (JSONException e) {
@@ -204,9 +202,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
-
-
         AutoCompleteTextView autoTextView = findViewById(R.id.textInput);
         System.out.print(Arrays.toString(list));
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list);
@@ -231,7 +226,6 @@ public class MainActivity extends AppCompatActivity {
         return Math.round(value * d) / d;
     }
 
-    @SuppressLint("SetTextI18n")
     public void clickedButton(View view){
 
         TextView output = findViewById(R.id.textOutput);
@@ -288,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
 
         Corona corona = null;
         if(availableConnection()){
-            Datein file = new Datein(fileName);
+            Datein file = new Datein(fileNameSettings);
             try {
                 corona = new Corona(location, type, this);
             } catch (JSONException e) {
@@ -332,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
                 else if(corona.getIncidence() < 10)
                     textView_inzidenz.setTextColor(this.getColor(R.color.DarkGreen));
                 else
-                    textView_inzidenz.setTextColor(Color.GRAY);
+                    textView_inzidenz.setTextColor(this.getColor(R.color.Gray));
             }
         }else{
             output.setText(getResources().getString(R.string.error_no_connection));
