@@ -4,7 +4,12 @@ plugins {
 
 android {
     compileSdk 31
+    compileSdkVersion 31
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
     defaultConfig {
         applicationId "de.luki2811.dev.inzidenzencheck"
         minSdk 27
@@ -21,10 +26,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+
     buildFeatures {
         viewBinding true
     }
