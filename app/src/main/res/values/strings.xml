@@ -13,7 +13,7 @@
     <string name="error_cant_find_bundesland">Fehler: Bundesland konnte nicht gefunden werden</string>
     <string name="error_no_connection">Keine Internetverbindung verfügbar</string>
     <string name="data_quelle_rki">Quelle: Robert Koch–Institut (RKI), dl–de/by-2-0</string>
-    <string name="app_version">v.0.4.2</string>
+    <string name="app_version">v.0.4.3</string>
     <string name="developed_by">Entwickelt von Luki2811</string>
     <string name="save">Speichern</string>
     <string name="settings">Einstellungen</string>

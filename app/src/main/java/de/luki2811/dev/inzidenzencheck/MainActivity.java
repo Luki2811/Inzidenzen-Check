@@ -208,8 +208,13 @@ public class MainActivity extends AppCompatActivity {
             else if (corona != null) {
                 // set settings
                 JSONObject jsonInFile;
+                File tempFile = new File(getApplicationContext().getFilesDir(), fileNameSettings);
+
                 try {
-                    jsonInFile = new JSONObject(file.loadFromFile(this));
+                    if(tempFile.exists())
+                        jsonInFile = new JSONObject(file.loadFromFile(this));
+                    else
+                        jsonInFile = new JSONObject();
                     jsonInFile.put("oldLocation", location);
                     jsonInFile.put("oldType", type);
                     file.writeInFile(jsonInFile.toString(), this);

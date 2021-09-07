@@ -35,8 +35,7 @@ public class Datein extends Application {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        InputStreamReader inputStreamReader =
-                new InputStreamReader(fis, StandardCharsets.UTF_8);
+        InputStreamReader inputStreamReader = new InputStreamReader(fis, StandardCharsets.UTF_8);
         StringBuilder stringBuilder = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
             String line = reader.readLine();
