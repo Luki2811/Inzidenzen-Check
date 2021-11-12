@@ -12,17 +12,18 @@
     <string name="error_cant_find_stadtkreis">Fehler: Stadtkreis konnte nicht gefunden werden</string>
     <string name="error_cant_find_bundesland">Fehler: Bundesland konnte nicht gefunden werden</string>
     <string name="error_no_connection">Keine Internetverbindung verfügbar</string>
-    <string name="data_quelle_rki">Quelle: Robert Koch–Institut (RKI), dl–de/by-2-0</string>
-    <string name="app_version">v.0.4.3</string>
+    <string name="data_quelle_rki">Quelle: Robert Koch–Institut (RKI), dl–de/by–2–0</string>
+    <string name="app_version">v.0.4.5</string>
     <string name="developed_by">Entwickelt von Luki2811</string>
     <string name="save">Speichern</string>
     <string name="settings">Einstellungen</string>
     <string name="settings_loadOldRequest">Letzte Abfrage automatisch einfügen</string>
-    <string name="open_licences">Open-Source-Lizenzen</string>
+    <string name="open_licences">Open-Source-Lizenzen öffnen</string>
     <string name="other">Sonstiges</string>
     <string name="third_party_notices">Hinweise von Drittanbietern</string>
     <string name="error_analysis">Fehler bei der Auswertung</string>
     <string name="error_app_restart_to_update">App neustarten um Daten zu aktualisieren</string>
     <string name="error_cant_load_data">Fehler: Daten konnten nicht geladen werden</string>
-    <string name="download_data">Daten werden heruntergeladen...</string>
+    <string name="download_data">Daten werden heruntergeladen…</string>
+    <string name="successfully_saved">Erfolgreich gespeichert</string>
 </resources>

@@ -12,14 +12,16 @@
         android:roundIcon="@mipmap/ico_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CoronaInzidenzen">
+
         <activity
-            android:name=".Quellen"
+            android:name=".SettingsActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustNothing"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

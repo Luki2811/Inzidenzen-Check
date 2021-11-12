@@ -15,12 +15,12 @@ import org.json.JSONObject;
 
 import java.io.File;
 
-public class Quellen extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_quellen);
+        setContentView(R.layout.activity_settings);
 
         File file = new File(getApplicationContext().getFilesDir(),MainActivity.fileNameSettings);
         Datein datei = new Datein(MainActivity.fileNameSettings);
@@ -69,5 +69,9 @@ public class Quellen extends AppCompatActivity {
         }
         datein.writeInFile(JsonObject.toString(), this);
 
+        Toast.makeText(this, getString(R.string.successfully_saved), Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 }

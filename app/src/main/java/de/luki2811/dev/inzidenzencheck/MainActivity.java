@@ -6,8 +6,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -18,21 +16,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
-
-    int type = 0;
 
     final static String fileNameSettings = "settings.json";
     final static String fileNameDataKreise = "data_kreise.json";
@@ -105,10 +95,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void setType(int type) {
-        this.type = type;
-    }
-
 
     public void onClickRadioButtons(View view){
         CoronaData data = new CoronaData(this,this);
@@ -142,42 +128,6 @@ public class MainActivity extends AppCompatActivity {
 
         String location = inputText.getText().toString();
 
-        // Abkürzungen nach https://www.destatis.de/DE/Methoden/abkuerzung-bundeslaender-DE-EN.html
-
-        if (location.equalsIgnoreCase("bw"))
-            location = "Baden-Württemberg";
-        if (location.equalsIgnoreCase("by"))
-            location = "Bayern";
-        if (location.equalsIgnoreCase("be"))
-            location = "Berlin";
-        if (location.equalsIgnoreCase("bb"))
-            location = "Brandenburg";
-        if (location.equalsIgnoreCase("hb"))
-            location = "Bremen";
-        if (location.equalsIgnoreCase("hh"))
-            location = "Hamburg";
-        if (location.equalsIgnoreCase("he"))
-            location = "Hessen";
-        if (location.equalsIgnoreCase("mv"))
-            location = "Mecklenburg-Vorpommern";
-        if (location.equalsIgnoreCase("ni"))
-            location = "Niedersachsen";
-        if (location.equalsIgnoreCase("nrw") || location.equalsIgnoreCase("nw"))
-            location = "Nordrhein-Westfalen";
-        if (location.equalsIgnoreCase("rp"))
-            location = "Rheinland-Pfalz";
-        if (location.equalsIgnoreCase("sl"))
-            location = "Saarland";
-        if (location.equalsIgnoreCase("sn"))
-            location = "Sachsen";
-        if (location.equalsIgnoreCase("st"))
-            location = "Sachsen-Anhalt";
-        if (location.equalsIgnoreCase("sh"))
-            location = "Schleswig-Holstein";
-        if (location.equalsIgnoreCase("th"))
-            location = "Thüringen";
-
-
         int type = -1;
 
         if(radioGroup.getCheckedRadioButtonId() == R.id.radioButton_bundesland)
@@ -205,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                 else
                     Toast.makeText(this,getResources().getString(R.string.error_analysis), Toast.LENGTH_LONG).show();
             }
-            else if (corona != null) {
+            else {
                 // set settings
                 JSONObject jsonInFile;
                 File tempFile = new File(getApplicationContext().getFilesDir(), fileNameSettings);
@@ -225,7 +175,11 @@ public class MainActivity extends AppCompatActivity {
                 output.setText(corona.getLocation() + " hat eine Coronainzidenz von:");
                 textView_inzidenz.setText("" + corona.getIncidence() + "");
                 // set color for each incidence
-                if(corona.getIncidence() >= 200)
+                if(corona.getIncidence() >= 1000)
+                    textView_inzidenz.setTextColor(this.getColor(R.color.DarkMagenta));
+                else if(corona.getIncidence() >= 500 && corona.getIncidence() < 1000)
+                    textView_inzidenz.setTextColor(this.getColor(R.color.Magenta));
+                else if(corona.getIncidence() >= 200 && corona.getIncidence() < 500)
                     textView_inzidenz.setTextColor(this.getColor(R.color.DarkRed));
                 else if(corona.getIncidence() >= 100 && corona.getIncidence() < 200)
                     textView_inzidenz.setTextColor(this.getColor(R.color.Red));
@@ -245,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void openSettings(View view){
-        Intent intent = new Intent(this, Quellen.class);
+        Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 }

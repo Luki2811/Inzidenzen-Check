@@ -73,7 +73,7 @@ public class CoronaData extends Thread{
             Datein fileBund = new Datein(MainActivity.fileNameDataBundeslaender);
             try {
                 JSONArray jsonArrayBund = new JSONObject(fileBund.loadFromFile(context)).getJSONArray("features");
-                System.out.println(jsonArrayBund.toString());
+                System.out.println(jsonArrayBund);
                 int length = jsonArrayBund.length();
 
                 list = new String[length];
@@ -123,8 +123,10 @@ public class CoronaData extends Thread{
                 e.printStackTrace();
             }
         }
+        if(list==null)
+            return;
+        Arrays.sort(list);
         AutoCompleteTextView autoTextView = activity.findViewById(R.id.textInput);
-        System.out.print(Arrays.toString(list));
         ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, list);
         activity.runOnUiThread(() -> autoTextView.setAdapter(adapter));
 
