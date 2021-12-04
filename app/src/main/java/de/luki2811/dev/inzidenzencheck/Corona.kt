@@ -1,69 +1,73 @@
-package de.luki2811.dev.inzidenzencheck;
+package de.luki2811.dev.inzidenzencheck
 
-import android.content.Context;
+import android.content.Context
+import de.luki2811.dev.inzidenzencheck.Datein
+import de.luki2811.dev.inzidenzencheck.Corona
+import de.luki2811.dev.inzidenzencheck.MainActivity
+import org.json.JSONObject
+import java.lang.NullPointerException
+import java.util.*
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+class Corona(str: String, type: Int, context: Context?) {
+    var location: String? = null
+    var incidence = 0.0
 
-public class Corona {
-    final static int LANDKREIS = 0;
-    final static int STADTKREIS = 1;
-    final static int BUNDESLAND = 2;
-
-    String location;
-    double incidence;
-
-    public String getLocation() {
-        return location;
+    companion object {
+        const val LANDKREIS = 0
+        const val STADTKREIS = 1
+        const val BUNDESLAND = 2
     }
 
-    public double getIncidence() {
-        return incidence;
-    }
-
-    public Corona(String str, int type, Context context) throws JSONException {
-        str = str.toLowerCase().trim();
-        System.out.println(str);
-        String location;
-        Datein file;
-        if(type == LANDKREIS || type == STADTKREIS){
-            if (type == LANDKREIS)
-                location = "lk " + str;
-            else
-                location = "sk " + str;
-            file = new Datein(MainActivity.fileNameDataKreise);
+    init {
+        var str = str
+        str = str.lowercase(Locale.getDefault()).trim { it <= ' ' }
+        println(str)
+        val location: String
+        val file: Datein
+        if (type == LANDKREIS || type == STADTKREIS) {
+            location = if (type == LANDKREIS) "lk $str" else "sk $str"
+            file = Datein(MainActivity.fileNameDataKreise)
             try {
-                JSONArray jsonArray = new JSONObject(file.loadFromFile(context)).getJSONArray("features");
-                for (int i = 0; i < jsonArray.length(); i++){
-                    if(location.equalsIgnoreCase(jsonArray.getJSONObject(i).getJSONObject("attributes").getString("county"))){
-                         this.location = jsonArray.getJSONObject(i).getJSONObject("attributes").getString("county");
-                         this.incidence = MainActivity.round(Double.parseDouble(jsonArray.getJSONObject(i).getJSONObject("attributes").getString("cases7_per_100k")),2);
+                val jsonArray = JSONObject(file.loadFromFile(context)).getJSONArray("features")
+                for (i in 0 until jsonArray.length()) {
+                    if (location.equals(
+                            jsonArray.getJSONObject(i).getJSONObject("attributes")
+                                .getString("county"), ignoreCase = true
+                        )
+                    ) {
+                        this.location = jsonArray.getJSONObject(i).getJSONObject("attributes")
+                            .getString("county")
+                        incidence = MainActivity.round(
+                            jsonArray.getJSONObject(i).getJSONObject("attributes")
+                                .getString("cases7_per_100k").toDouble(), 2
+                        )
                     }
                 }
-            }catch (NullPointerException e){
-                e.printStackTrace();
+            } catch (e: NullPointerException) {
+                e.printStackTrace()
             }
         } else {
-            location = str;
-
-            file = new Datein(MainActivity.fileNameDataBundeslaender);
-
+            location = str
+            file = Datein(MainActivity.fileNameDataBundeslaender)
             try {
-                JSONArray jsonArray = new JSONObject(file.loadFromFile(context)).getJSONArray("features");
-                for (int i = 0; i < jsonArray.length(); i++){
-                    if(location.equalsIgnoreCase(jsonArray.getJSONObject(i).getJSONObject("attributes").getString("LAN_ew_GEN"))){
-                        this.location = jsonArray.getJSONObject(i).getJSONObject("attributes").getString("LAN_ew_GEN");
-                        this.incidence = MainActivity.round(Double.parseDouble(jsonArray.getJSONObject(i).getJSONObject("attributes").getString("cases7_bl_per_100k")),2);
+                val jsonArray = JSONObject(file.loadFromFile(context)).getJSONArray("features")
+                for (i in 0 until jsonArray.length()) {
+                    if (location.equals(
+                            jsonArray.getJSONObject(i).getJSONObject("attributes")
+                                .getString("LAN_ew_GEN"), ignoreCase = true
+                        )
+                    ) {
+                        this.location = jsonArray.getJSONObject(i).getJSONObject("attributes")
+                            .getString("LAN_ew_GEN")
+                        incidence = MainActivity.round(
+                            jsonArray.getJSONObject(i).getJSONObject("attributes")
+                                .getString("cases7_bl_per_100k").toDouble(), 2
+                        )
                     }
                 }
-            }catch (NullPointerException e){
-                e.printStackTrace();
+            } catch (e: NullPointerException) {
+                e.printStackTrace()
             }
         }
     }
 }
-
-
-
-

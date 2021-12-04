@@ -1,63 +1,42 @@
-package de.luki2811.dev.inzidenzencheck;
+package de.luki2811.dev.inzidenzencheck
 
-import android.app.Application;
-import android.content.Context;
-import android.util.Log;
+import android.app.Application
+import android.content.Context
+import android.util.Log
+import java.io.*
+import java.nio.charset.StandardCharsets
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-
-public class Datein extends Application {
-
-    String name;
-
-    public Datein(String name) {
-        setName(name);
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String loadFromFile(Context context){
-        FileInputStream fis = null;
+class Datein(var name: String) : Application() {
+    fun loadFromFile(context: Context): String {
+        var fis: FileInputStream? = null
         try {
-            fis = context.openFileInput(name);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            fis = context.openFileInput(name)
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
         }
-        InputStreamReader inputStreamReader = new InputStreamReader(fis, StandardCharsets.UTF_8);
-        StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
-            String line = reader.readLine();
-            while (line != null) {
-                stringBuilder.append(line).append('\n');
-                line = reader.readLine();
+        val inputStreamReader = InputStreamReader(fis, StandardCharsets.UTF_8)
+        val stringBuilder = StringBuilder()
+        try {
+            BufferedReader(inputStreamReader).use { reader ->
+                var line = reader.readLine()
+                while (line != null) {
+                    stringBuilder.append(line).append('\n')
+                    line = reader.readLine()
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
-        return stringBuilder.toString();
-
-
+        return stringBuilder.toString()
     }
-    public void writeInFile(String text, Context context){
+
+    fun writeInFile(text: String?, context: Context) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(name, Context.MODE_PRIVATE));
-            outputStreamWriter.write(text);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
+            val outputStreamWriter = OutputStreamWriter(context.openFileOutput(name, MODE_PRIVATE))
+            outputStreamWriter.write(text)
+            outputStreamWriter.close()
+        } catch (e: IOException) {
+            Log.e("Exception", "File write failed: $e")
         }
     }
 }

@@ -1,205 +1,181 @@
-package de.luki2811.dev.inzidenzencheck;
+package de.luki2811.dev.inzidenzencheck
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.content.Intent
+import android.net.ConnectivityManager
+import android.os.Bundle
+import android.view.View
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.File
 
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-
-
-public class MainActivity extends AppCompatActivity {
-
-    final static String fileNameSettings = "settings.json";
-    final static String fileNameDataKreise = "data_kreise.json";
-    final static String fileNameDataBundeslaender = "data_bundeslaender.json";
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        CoronaData data;
-
-        Button sendButton = findViewById(R.id.button);
-        sendButton.setEnabled(false);
-
-        TextView output = findViewById(R.id.textOutput);
-
-        if(availableConnection()){
-            data = new CoronaData(this, this);
-            data.start();
-            output.setText(getResources().getString(R.string.download_data));
-
-        }else{
-            Toast.makeText(this,getResources().getString(R.string.error_cant_load_data), Toast.LENGTH_LONG).show();
-            output.setText(getResources().getString(R.string.error_no_connection) + "\n" + getResources().getString(R.string.error_app_restart_to_update));
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        val data: CoronaData
+        val sendButton = findViewById<Button>(R.id.button)
+        sendButton.isEnabled = false
+        val output = findViewById<TextView>(R.id.textOutput)
+        if (availableConnection()) {
+            data = CoronaData(this, this)
+            data.start()
+            output.text = resources.getString(R.string.download_data)
+        } else {
+            Toast.makeText(
+                this,
+                resources.getString(R.string.error_cant_load_data),
+                Toast.LENGTH_LONG
+            ).show()
+            output.text = """
+                ${resources.getString(R.string.error_no_connection)}
+                ${resources.getString(R.string.error_app_restart_to_update)}
+                """.trimIndent()
         }
-
-        File file = new File(getApplicationContext().getFilesDir(), fileNameSettings);
-        Datein datei = new Datein(fileNameSettings);
-
-        if(file.exists()){
-            JSONObject jsonTEMP;
-            boolean setOld = true;
+        val file = File(applicationContext.filesDir, fileNameSettings)
+        val datei = Datein(fileNameSettings)
+        if (file.exists()) {
+            val jsonTEMP: JSONObject
+            var setOld = true
             try {
-                jsonTEMP = new JSONObject(datei.loadFromFile(this));
-                setOld = jsonTEMP.getBoolean("automaticPlaceInput");
-            } catch (JSONException e) {
-                e.printStackTrace();
-
+                jsonTEMP = JSONObject(datei.loadFromFile(this))
+                setOld = jsonTEMP.getBoolean("automaticPlaceInput")
+            } catch (e: JSONException) {
+                e.printStackTrace()
             }
-            if(setOld){
-                EditText inputText = findViewById(R.id.textInput);
-                RadioButton radio_lk = findViewById(R.id.radioButton_landkreis);
-                RadioButton radio_sk = findViewById(R.id.radioButton_stadtkreis);
-                RadioButton radio_bl = findViewById(R.id.radioButton_bundesland);
-                int oldType = -1;
-                JSONObject json;
-                String oldLocation = null;
-
-                Datein dfile = new Datein(fileNameSettings);
+            if (setOld) {
+                val inputText = findViewById<EditText>(R.id.textInput)
+                val radio_lk = findViewById<RadioButton>(R.id.radioButton_landkreis)
+                val radio_sk = findViewById<RadioButton>(R.id.radioButton_stadtkreis)
+                val radio_bl = findViewById<RadioButton>(R.id.radioButton_bundesland)
+                var oldType = -1
+                val json: JSONObject
+                var oldLocation: String? = null
+                val dfile = Datein(fileNameSettings)
                 try {
-                    json = new JSONObject(dfile.loadFromFile(this));
-                    oldLocation = json.getString("oldLocation");
-                    oldType = json.getInt("oldType");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    json = JSONObject(dfile.loadFromFile(this))
+                    oldLocation = json.getString("oldLocation")
+                    oldType = json.getInt("oldType")
+                } catch (e: JSONException) {
+                    e.printStackTrace()
                 }
-                if(oldType == Corona.LANDKREIS){
-                    radio_bl.setChecked(false);
-                    radio_lk.setChecked(true);
-                }else if(oldType == Corona.STADTKREIS){
-                    radio_bl.setChecked(false);
-                    radio_sk.setChecked(true);
-                }else
-                    radio_bl.setChecked(true);
-
-                inputText.setText(oldLocation);
+                if (oldType == Corona.LANDKREIS) {
+                    radio_bl.isChecked = false
+                    radio_lk.isChecked = true
+                } else if (oldType == Corona.STADTKREIS) {
+                    radio_bl.isChecked = false
+                    radio_sk.isChecked = true
+                } else radio_bl.isChecked = true
+                inputText.setText(oldLocation)
             }
         }
     }
 
-
-    public void onClickRadioButtons(View view){
-        CoronaData data = new CoronaData(this,this);
-        data.setAutoCompleteList();
+    fun onClickRadioButtons(view: View?) {
+        val data = CoronaData(this, this)
+        data.setAutoCompleteList()
     }
 
-    public boolean availableConnection(){
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    fun availableConnection(): Boolean {
+        val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 
-    /**
-     * Rundet den übergebenen Wert auf die Anzahl der übergebenen Nachkommastellen
-     *
-     * @param value ist der zu rundende Wert.
-     * @param decimalPoints ist die Anzahl der Nachkommastellen, auf die gerundet werden soll.
-     */
-    public static double round(double value, int decimalPoints) {
-        double d = Math.pow(10, decimalPoints);
-        return Math.round(value * d) / d;
-    }
-
-    public void clickedButton(View view){
-
-        TextView output = findViewById(R.id.textOutput);
-        EditText inputText = findViewById(R.id.textInput);
-        RadioGroup radioGroup = findViewById(R.id.radioGroup);
-        TextView textView_inzidenz = findViewById(R.id.textInzidenz);
-
-        String location = inputText.getText().toString();
-
-        int type = -1;
-
-        if(radioGroup.getCheckedRadioButtonId() == R.id.radioButton_bundesland)
-            type = Corona.BUNDESLAND;
-        if(radioGroup.getCheckedRadioButtonId() == R.id.radioButton_landkreis)
-            type = Corona.LANDKREIS;
-        if(radioGroup.getCheckedRadioButtonId() == R.id.radioButton_stadtkreis)
-            type = Corona.STADTKREIS;
-
-        Corona corona = null;
-        if(availableConnection()){
-            Datein file = new Datein(fileNameSettings);
+    fun clickedButton(view: View?) {
+        val output = findViewById<TextView>(R.id.textOutput)
+        val inputText = findViewById<EditText>(R.id.textInput)
+        val radioGroup = findViewById<RadioGroup>(R.id.radioGroup)
+        val textView_inzidenz = findViewById<TextView>(R.id.textInzidenz)
+        val location = inputText.text.toString()
+        var type = -1
+        if (radioGroup.checkedRadioButtonId == R.id.radioButton_bundesland) type = Corona.BUNDESLAND
+        if (radioGroup.checkedRadioButtonId == R.id.radioButton_landkreis) type = Corona.LANDKREIS
+        if (radioGroup.checkedRadioButtonId == R.id.radioButton_stadtkreis) type = Corona.STADTKREIS
+        var corona: Corona? = null
+        if (availableConnection()) {
+            val file = Datein(fileNameSettings)
             try {
-                corona = new Corona(location, type, this);
-            } catch (JSONException e) {
-                e.printStackTrace();
+                corona = Corona(location, type, this)
+            } catch (e: JSONException) {
+                e.printStackTrace()
             }
-            if(corona.getLocation() == null){
-                if(type == Corona.LANDKREIS)
-                    Toast.makeText(this, getResources().getString(R.string.error_cant_find_landkreis) , Toast.LENGTH_LONG).show();
-                else if(type == Corona.STADTKREIS)
-                    Toast.makeText(this, getResources().getString(R.string.error_cant_find_stadtkreis), Toast.LENGTH_LONG).show();
-                else if(type == Corona.BUNDESLAND)
-                    Toast.makeText(this, getResources().getString(R.string.error_cant_find_bundesland), Toast.LENGTH_LONG).show();
-                else
-                    Toast.makeText(this,getResources().getString(R.string.error_analysis), Toast.LENGTH_LONG).show();
-            }
-            else {
+            if (corona!!.location == null) {
+                if (type == Corona.LANDKREIS) Toast.makeText(
+                    this,
+                    resources.getString(R.string.error_cant_find_landkreis),
+                    Toast.LENGTH_LONG
+                ).show() else if (type == Corona.STADTKREIS) Toast.makeText(
+                    this,
+                    resources.getString(R.string.error_cant_find_stadtkreis),
+                    Toast.LENGTH_LONG
+                ).show() else if (type == Corona.BUNDESLAND) Toast.makeText(
+                    this,
+                    resources.getString(R.string.error_cant_find_bundesland),
+                    Toast.LENGTH_LONG
+                ).show() else Toast.makeText(
+                    this,
+                    resources.getString(R.string.error_analysis),
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
                 // set settings
-                JSONObject jsonInFile;
-                File tempFile = new File(getApplicationContext().getFilesDir(), fileNameSettings);
-
+                val jsonInFile: JSONObject
+                val tempFile = File(applicationContext.filesDir, fileNameSettings)
                 try {
-                    if(tempFile.exists())
-                        jsonInFile = new JSONObject(file.loadFromFile(this));
-                    else
-                        jsonInFile = new JSONObject();
-                    jsonInFile.put("oldLocation", location);
-                    jsonInFile.put("oldType", type);
-                    file.writeInFile(jsonInFile.toString(), this);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    jsonInFile =
+                        if (tempFile.exists()) JSONObject(file.loadFromFile(this)) else JSONObject()
+                    jsonInFile.put("oldLocation", location)
+                    jsonInFile.put("oldType", type)
+                    file.writeInFile(jsonInFile.toString(), this)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
                 }
                 // set text
-                output.setText(corona.getLocation() + " hat eine Coronainzidenz von:");
-                textView_inzidenz.setText("" + corona.getIncidence() + "");
+                output.text = corona.location + " hat eine Coronainzidenz von:"
+                textView_inzidenz.text = "" + corona.incidence + ""
                 // set color for each incidence
-                if(corona.getIncidence() >= 1000)
-                    textView_inzidenz.setTextColor(this.getColor(R.color.DarkMagenta));
-                else if(corona.getIncidence() >= 500 && corona.getIncidence() < 1000)
-                    textView_inzidenz.setTextColor(this.getColor(R.color.Magenta));
-                else if(corona.getIncidence() >= 200 && corona.getIncidence() < 500)
-                    textView_inzidenz.setTextColor(this.getColor(R.color.DarkRed));
-                else if(corona.getIncidence() >= 100 && corona.getIncidence() < 200)
-                    textView_inzidenz.setTextColor(this.getColor(R.color.Red));
-                else if(corona.getIncidence() >= 50 && corona.getIncidence() < 100)
-                    textView_inzidenz.setTextColor(this.getColor(R.color.Orange));
-                else if(corona.getIncidence() >= 25 && corona.getIncidence() < 50)
-                    textView_inzidenz.setTextColor(this.getColor(R.color.Yellow));
-                else if(corona.getIncidence() >= 10 && corona.getIncidence() < 25)
-                    textView_inzidenz.setTextColor(this.getColor(R.color.Green));
-                else if(corona.getIncidence() < 10)
-                    textView_inzidenz.setTextColor(this.getColor(R.color.DarkGreen));
-                else
-                    textView_inzidenz.setTextColor(this.getColor(R.color.Gray));
+                if (corona.incidence >= 1000) textView_inzidenz.setTextColor(getColor(R.color.DarkMagenta)) else if (corona.incidence >= 500 && corona.incidence < 1000) textView_inzidenz.setTextColor(
+                    getColor(R.color.Magenta)
+                ) else if (corona.incidence >= 200 && corona.incidence < 500) textView_inzidenz.setTextColor(
+                    getColor(R.color.DarkRed)
+                ) else if (corona.incidence >= 100 && corona.incidence < 200) textView_inzidenz.setTextColor(
+                    getColor(R.color.Red)
+                ) else if (corona.incidence >= 50 && corona.incidence < 100) textView_inzidenz.setTextColor(
+                    getColor(R.color.Orange)
+                ) else if (corona.incidence >= 25 && corona.incidence < 50) textView_inzidenz.setTextColor(
+                    getColor(R.color.Yellow)
+                ) else if (corona.incidence >= 10 && corona.incidence < 25) textView_inzidenz.setTextColor(
+                    getColor(R.color.Green)
+                ) else if (corona.incidence < 10) textView_inzidenz.setTextColor(getColor(R.color.DarkGreen)) else textView_inzidenz.setTextColor(
+                    getColor(R.color.Gray)
+                )
             }
-        }else{
-            output.setText(getResources().getString(R.string.error_no_connection));
+        } else {
+            output.text = resources.getString(R.string.error_no_connection)
         }
     }
-    public void openSettings(View view){
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
+
+    fun openSettings(view: View?) {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivity(intent)
+    }
+
+    companion object {
+        const val fileNameSettings = "settings.json"
+        const val fileNameDataKreise = "data_kreise.json"
+        const val fileNameDataBundeslaender = "data_bundeslaender.json"
+
+        /**
+         * Rundet den übergebenen Wert auf die Anzahl der übergebenen Nachkommastellen
+         *
+         * @param value ist der zu rundende Wert.
+         * @param decimalPoints ist die Anzahl der Nachkommastellen, auf die gerundet werden soll.
+         */
+        fun round(value: Double, decimalPoints: Int): Double {
+            val d = Math.pow(10.0, decimalPoints.toDouble())
+            return Math.round(value * d) / d
+        }
     }
 }
