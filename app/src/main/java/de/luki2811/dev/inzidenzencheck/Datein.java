@@ -24,10 +24,6 @@ public class Datein extends Application {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public String loadFromFile(Context context){
         FileInputStream fis = null;
         try {
