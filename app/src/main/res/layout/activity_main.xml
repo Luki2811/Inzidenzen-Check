@@ -6,19 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <RadioGroup
+    <com.google.android.material.chip.ChipGroup
 
-        android:id="@+id/radioGroup"
-        android:layout_width="327dp"
+        android:id="@+id/chipGroup"
+        android:layout_width="0dp"
         android:layout_height="51dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <RadioButton
-            android:id="@+id/radioButton_bundesland"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_bundesland"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:checked="true"
@@ -26,22 +28,21 @@
             android:text="@string/bundesland" />
 
 
-
-        <RadioButton
-            android:id="@+id/radioButton_landkreis"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_landkreis"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="onClickRadioButtons"
             android:text="@string/landkreis" />
 
-        <RadioButton
-            android:id="@+id/radioButton_stadtkreis"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_stadtkreis"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="onClickRadioButtons"
             android:text="@string/stadtkreis" />
 
-    </RadioGroup>
+    </com.google.android.material.chip.ChipGroup>
 
 
     <AutoCompleteTextView
@@ -49,7 +50,7 @@
         android:layout_width="0dp"
         android:layout_height="57dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:completionThreshold="0"
         android:ems="10"
@@ -59,7 +60,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+        app:layout_constraintTop_toBottomOf="@+id/chipGroup" />
 
     <Button
         android:id="@+id/button"
