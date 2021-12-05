@@ -1,8 +1,11 @@
 package de.luki2811.dev.inzidenzencheck
 
+import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -18,28 +21,14 @@ import java.io.File
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
+
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val data: CoronaData
-        val sendButton = findViewById<Button>(R.id.button)
-        sendButton.isEnabled = false
-        val output = findViewById<TextView>(R.id.textOutput)
-        if (availableConnection()) {
-            data = CoronaData(this, this)
-            data.start()
-            output.text = resources.getString(R.string.download_data)
-        } else {
-            Toast.makeText(
-                this,
-                resources.getString(R.string.error_cant_load_data),
-                Toast.LENGTH_LONG
-            ).show()
-            output.text = getString(R.string.twoStrings, getText(R.string.error_no_connection), getString(R.string.error_app_restart_to_update))
+        getCoronaData()
 
-        }
         val file = File(applicationContext.filesDir, fileNameSettings)
         val datei = Datein(fileNameSettings)
         if (file.exists()) {
@@ -84,10 +73,55 @@ class MainActivity : AppCompatActivity() {
         refreshTextHint()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            R.id.action_refresh ->{
+                getCoronaData()
+                Toast.makeText(this, R.string.refresh_data, Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
     fun onClickRadioButtons(view: View?) {
         val data = CoronaData(this, this)
         data.setAutoCompleteList()
         refreshTextHint()
+    }
+
+    private fun getCoronaData(){
+        val data: CoronaData
+        val sendButton = findViewById<Button>(R.id.button)
+        sendButton.isEnabled = false
+        val output = findViewById<TextView>(R.id.textOutput)
+        val textInzidenz = findViewById<TextView>(R.id.textInzidenz)
+        textInzidenz.text = ""
+        if (isInternetAvailable()) {
+            data = CoronaData(this, this)
+            data.start()
+            output.text = resources.getString(R.string.download_data)
+        } else {
+            Toast.makeText(
+                this,
+                resources.getString(R.string.error_cant_load_data),
+                Toast.LENGTH_LONG
+            ).show()
+            output.text = getString(R.string.twoStrings, getText(R.string.error_no_connection), getString(R.string.error_app_restart_to_update))
+
+        }
     }
 
     private fun refreshTextHint(){
@@ -100,12 +134,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun availableConnection(): Boolean {
-        val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
+    private fun isInternetAvailable(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val netInfo = cm.activeNetworkInfo
+        return netInfo != null && netInfo.isConnectedOrConnecting
     }
-
     fun clickedButton(view: View?) {
         val output = findViewById<TextView>(R.id.textOutput)
         val inputText = findViewById<EditText>(R.id.editTextInput)
@@ -119,7 +152,7 @@ class MainActivity : AppCompatActivity() {
         if(chipSK.isChecked) type = Corona.STADTKREIS
         if(chipBL.isChecked) type = Corona.BUNDESLAND
         var corona: Corona? = null
-        if (availableConnection()) {
+        if (isInternetAvailable()) {
             val file = Datein(fileNameSettings)
             try {
                 corona = Corona(location, type, this)
@@ -128,26 +161,10 @@ class MainActivity : AppCompatActivity() {
             }
             if (corona!!.location == null) {
                 when (type) {
-                    Corona.LANDKREIS -> Toast.makeText(
-                            this,
-                            resources.getString(R.string.error_cant_find_landkreis),
-                            Toast.LENGTH_LONG
-                    ).show()
-                    Corona.STADTKREIS -> Toast.makeText(
-                            this,
-                            resources.getString(R.string.error_cant_find_stadtkreis),
-                            Toast.LENGTH_LONG
-                    ).show()
-                    Corona.BUNDESLAND -> Toast.makeText(
-                            this,
-                            resources.getString(R.string.error_cant_find_bundesland),
-                            Toast.LENGTH_LONG
-                    ).show()
-                    else -> Toast.makeText(
-                            this,
-                            resources.getString(R.string.error_analysis),
-                            Toast.LENGTH_LONG
-                    ).show()
+                    Corona.LANDKREIS -> Toast.makeText(this, resources.getString(R.string.error_cant_find_landkreis), Toast.LENGTH_LONG).show()
+                    Corona.STADTKREIS -> Toast.makeText(this, resources.getString(R.string.error_cant_find_stadtkreis), Toast.LENGTH_LONG).show()
+                    Corona.BUNDESLAND -> Toast.makeText(this, resources.getString(R.string.error_cant_find_bundesland), Toast.LENGTH_LONG).show()
+                    else -> Toast.makeText(this, resources.getString(R.string.error_analysis), Toast.LENGTH_LONG).show()
                 }
             } else {
                 // set settings
@@ -179,22 +196,18 @@ class MainActivity : AppCompatActivity() {
                 ) else if (corona.incidence >= 50 && corona.incidence < 100)
                     textViewInzidenz.setTextColor(getColor(R.color.Orange)
                 ) else if (corona.incidence >= 25 && corona.incidence < 50)
-                    textViewInzidenz.setTextColor(
-                    getColor(R.color.Yellow)
-                ) else if (corona.incidence >= 10 && corona.incidence < 25) textViewInzidenz.setTextColor(
-                    getColor(R.color.Green)
-                ) else if (corona.incidence < 10) textViewInzidenz.setTextColor(getColor(R.color.DarkGreen)) else textViewInzidenz.setTextColor(
-                    getColor(R.color.Gray)
+                    textViewInzidenz.setTextColor(getColor(R.color.Yellow)
+                ) else if (corona.incidence >= 10 && corona.incidence < 25)
+                    textViewInzidenz.setTextColor(getColor(R.color.Green)
+                ) else if (corona.incidence < 10)
+                    textViewInzidenz.setTextColor(getColor(R.color.DarkGreen))
+                else
+                    textViewInzidenz.setTextColor(getColor(R.color.Gray)
                 )
             }
         } else {
             output.text = resources.getString(R.string.error_no_connection)
         }
-    }
-
-    fun openSettings(view: View?) {
-        val intent = Intent(this, SettingsActivity::class.java)
-        startActivity(intent)
     }
 
     companion object {

@@ -11,6 +11,8 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.net.MalformedURLException
 import java.net.URL
+import java.text.DateFormat
+import java.text.DateFormat.getDateTimeInstance
 import java.util.*
 
 class CoronaData(private var context: Context, private var activity: Activity) : Thread() {
@@ -31,17 +33,22 @@ class CoronaData(private var context: Context, private var activity: Activity) :
         val bund = InternetRequest(urlBund, context, MainActivity.fileNameDataBundeslaender)
         bund.start()
         try {
-            bund.join()
-            land.join()
+            bund.join(0)
+            land.join(0)
         } catch (e: InterruptedException) {
             e.printStackTrace()
         }
         setAutoCompleteList()
         val sendButton = activity.findViewById<Button>(R.id.button)
         val output = activity.findViewById<TextView>(R.id.textOutput)
+        val refreshedText = activity.findViewById<TextView>(R.id.textLastTimeRefreshed)
         activity.runOnUiThread {
             sendButton.isEnabled = true
             output.text = activity.getString(R.string.search_for_something)
+            val date = Calendar.getInstance().time
+            val dateFormat = getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(date)
+            refreshedText.text = activity.getString(R.string.data_status, dateFormat)
+
         }
     }
 

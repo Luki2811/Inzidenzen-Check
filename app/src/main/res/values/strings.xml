@@ -29,4 +29,7 @@
     <string name="successfully_saved">Erfolgreich gespeichert</string>
     <string name="result">%1$s hat eine Coronainzidenz von:</string>
     <string name="twoStrings">%1$s \n %2$s</string>
+    <string name="refresh">Aktualisieren</string>
+    <string name="refresh_data">Daten werden aktualisiert</string>
+    <string name="data_status">Datenstand: %1$s</string>
 </resources>

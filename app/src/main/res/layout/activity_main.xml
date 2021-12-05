@@ -128,17 +128,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textOutput" />
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/extended_fab"
-        android:onClick="openSettings"
+    <TextView
+        android:id="@+id/textLastTimeRefreshed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_marginBottom="20dp"
-        android:text="@string/settings"
-        app:icon="@drawable/ic_baseline_settings_24"
+        android:layout_marginBottom="16dp"
+        android:text="@string/data_status"
         app:layout_constraintBottom_toTopOf="@+id/subtitleNavDrawer"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
