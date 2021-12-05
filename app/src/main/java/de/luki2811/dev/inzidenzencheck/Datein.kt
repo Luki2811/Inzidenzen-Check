@@ -6,7 +6,7 @@ import android.util.Log
 import java.io.*
 import java.nio.charset.StandardCharsets
 
-class Datein(var name: String) : Application() {
+class Datein(private var name: String) : Application() {
     fun loadFromFile(context: Context): String {
         var fis: FileInputStream? = null
         try {

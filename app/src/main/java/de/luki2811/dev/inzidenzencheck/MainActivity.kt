@@ -4,16 +4,25 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         val data: CoronaData
         val sendButton = findViewById<Button>(R.id.button)
         sendButton.isEnabled = false
@@ -28,10 +37,8 @@ class MainActivity : AppCompatActivity() {
                 resources.getString(R.string.error_cant_load_data),
                 Toast.LENGTH_LONG
             ).show()
-            output.text = """
-                ${resources.getString(R.string.error_no_connection)}
-                ${resources.getString(R.string.error_app_restart_to_update)}
-                """.trimIndent()
+            output.text = getString(R.string.twoStrings, getText(R.string.error_no_connection), getString(R.string.error_app_restart_to_update))
+
         }
         val file = File(applicationContext.filesDir, fileNameSettings)
         val datei = Datein(fileNameSettings)
@@ -45,10 +52,10 @@ class MainActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
             if (setOld) {
-                val inputText = findViewById<EditText>(R.id.textInput)
-                val radio_lk = findViewById<RadioButton>(R.id.radioButton_landkreis)
-                val radio_sk = findViewById<RadioButton>(R.id.radioButton_stadtkreis)
-                val radio_bl = findViewById<RadioButton>(R.id.radioButton_bundesland)
+                val inputText = findViewById<EditText>(R.id.editTextInput)
+                val chipLK = findViewById<Chip>(R.id.chip_landkreis)
+                val chipSK = findViewById<Chip>(R.id.chip_stadtkreis)
+                val chipBL = findViewById<Chip>(R.id.chip_bundesland)
                 var oldType = -1
                 val json: JSONObject
                 var oldLocation: String? = null
@@ -60,24 +67,40 @@ class MainActivity : AppCompatActivity() {
                 } catch (e: JSONException) {
                     e.printStackTrace()
                 }
-                if (oldType == Corona.LANDKREIS) {
-                    radio_bl.isChecked = false
-                    radio_lk.isChecked = true
-                } else if (oldType == Corona.STADTKREIS) {
-                    radio_bl.isChecked = false
-                    radio_sk.isChecked = true
-                } else radio_bl.isChecked = true
+                when (oldType) {
+                    Corona.LANDKREIS -> {
+                        chipBL.isChecked = false
+                        chipLK.isChecked = true
+                    }
+                    Corona.STADTKREIS -> {
+                        chipBL.isChecked = false
+                        chipSK.isChecked = true
+                    }
+                    else -> chipBL.isChecked = true
+                }
                 inputText.setText(oldLocation)
             }
         }
+        refreshTextHint()
     }
 
     fun onClickRadioButtons(view: View?) {
         val data = CoronaData(this, this)
         data.setAutoCompleteList()
+        refreshTextHint()
     }
 
-    fun availableConnection(): Boolean {
+    private fun refreshTextHint(){
+        val inputText = findViewById<TextInputLayout>(R.id.textInput)
+        val chipGroup = findViewById<ChipGroup>(R.id.chipGroup)
+        when(chipGroup.checkedChipId){
+            findViewById<Chip>(R.id.chip_bundesland).id -> inputText.hint = getString(R.string.bundesland)
+            findViewById<Chip>(R.id.chip_landkreis).id -> inputText.hint = getString(R.string.landkreis)
+            findViewById<Chip>(R.id.chip_stadtkreis).id -> inputText.hint = getString(R.string.stadtkreis)
+        }
+    }
+
+    private fun availableConnection(): Boolean {
         val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
@@ -85,14 +108,16 @@ class MainActivity : AppCompatActivity() {
 
     fun clickedButton(view: View?) {
         val output = findViewById<TextView>(R.id.textOutput)
-        val inputText = findViewById<EditText>(R.id.textInput)
-        val radioGroup = findViewById<RadioGroup>(R.id.radioGroup)
-        val textView_inzidenz = findViewById<TextView>(R.id.textInzidenz)
+        val inputText = findViewById<EditText>(R.id.editTextInput)
+        val textViewInzidenz = findViewById<TextView>(R.id.textInzidenz)
         val location = inputText.text.toString()
         var type = -1
-        if (radioGroup.checkedRadioButtonId == R.id.radioButton_bundesland) type = Corona.BUNDESLAND
-        if (radioGroup.checkedRadioButtonId == R.id.radioButton_landkreis) type = Corona.LANDKREIS
-        if (radioGroup.checkedRadioButtonId == R.id.radioButton_stadtkreis) type = Corona.STADTKREIS
+        val chipLK = findViewById<Chip>(R.id.chip_landkreis)
+        val chipSK = findViewById<Chip>(R.id.chip_stadtkreis)
+        val chipBL = findViewById<Chip>(R.id.chip_bundesland)
+        if(chipLK.isChecked) type = Corona.LANDKREIS
+        if(chipSK.isChecked) type = Corona.STADTKREIS
+        if(chipBL.isChecked) type = Corona.BUNDESLAND
         var corona: Corona? = null
         if (availableConnection()) {
             val file = Datein(fileNameSettings)
@@ -102,23 +127,28 @@ class MainActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
             if (corona!!.location == null) {
-                if (type == Corona.LANDKREIS) Toast.makeText(
-                    this,
-                    resources.getString(R.string.error_cant_find_landkreis),
-                    Toast.LENGTH_LONG
-                ).show() else if (type == Corona.STADTKREIS) Toast.makeText(
-                    this,
-                    resources.getString(R.string.error_cant_find_stadtkreis),
-                    Toast.LENGTH_LONG
-                ).show() else if (type == Corona.BUNDESLAND) Toast.makeText(
-                    this,
-                    resources.getString(R.string.error_cant_find_bundesland),
-                    Toast.LENGTH_LONG
-                ).show() else Toast.makeText(
-                    this,
-                    resources.getString(R.string.error_analysis),
-                    Toast.LENGTH_LONG
-                ).show()
+                when (type) {
+                    Corona.LANDKREIS -> Toast.makeText(
+                            this,
+                            resources.getString(R.string.error_cant_find_landkreis),
+                            Toast.LENGTH_LONG
+                    ).show()
+                    Corona.STADTKREIS -> Toast.makeText(
+                            this,
+                            resources.getString(R.string.error_cant_find_stadtkreis),
+                            Toast.LENGTH_LONG
+                    ).show()
+                    Corona.BUNDESLAND -> Toast.makeText(
+                            this,
+                            resources.getString(R.string.error_cant_find_bundesland),
+                            Toast.LENGTH_LONG
+                    ).show()
+                    else -> Toast.makeText(
+                            this,
+                            resources.getString(R.string.error_analysis),
+                            Toast.LENGTH_LONG
+                    ).show()
+                }
             } else {
                 // set settings
                 val jsonInFile: JSONObject
@@ -133,22 +163,27 @@ class MainActivity : AppCompatActivity() {
                     e.printStackTrace()
                 }
                 // set text
-                output.text = corona.location + " hat eine Coronainzidenz von:"
-                textView_inzidenz.text = "" + corona.incidence + ""
+                output.text = getString(R.string.result, corona.location)
+                textViewInzidenz.text = corona.incidence.toString()
                 // set color for each incidence
-                if (corona.incidence >= 1000) textView_inzidenz.setTextColor(getColor(R.color.DarkMagenta)) else if (corona.incidence >= 500 && corona.incidence < 1000) textView_inzidenz.setTextColor(
-                    getColor(R.color.Magenta)
-                ) else if (corona.incidence >= 200 && corona.incidence < 500) textView_inzidenz.setTextColor(
-                    getColor(R.color.DarkRed)
-                ) else if (corona.incidence >= 100 && corona.incidence < 200) textView_inzidenz.setTextColor(
-                    getColor(R.color.Red)
-                ) else if (corona.incidence >= 50 && corona.incidence < 100) textView_inzidenz.setTextColor(
-                    getColor(R.color.Orange)
-                ) else if (corona.incidence >= 25 && corona.incidence < 50) textView_inzidenz.setTextColor(
+                if (corona.incidence >= 2000)
+                    textViewInzidenz.setTextColor(getColor(R.color.DarkMagenta))
+                else if (corona.incidence >= 1000 && corona.incidence < 2000)
+                    textViewInzidenz.setTextColor(getColor(R.color.DarkViolet))
+                else if (corona.incidence >= 500 && corona.incidence < 1000)
+                    textViewInzidenz.setTextColor(getColor(R.color.Magenta)
+                ) else if (corona.incidence >= 200 && corona.incidence < 500)
+                    textViewInzidenz.setTextColor(getColor(R.color.DarkRed)
+                ) else if (corona.incidence >= 100 && corona.incidence < 200)
+                    textViewInzidenz.setTextColor(getColor(R.color.Red)
+                ) else if (corona.incidence >= 50 && corona.incidence < 100)
+                    textViewInzidenz.setTextColor(getColor(R.color.Orange)
+                ) else if (corona.incidence >= 25 && corona.incidence < 50)
+                    textViewInzidenz.setTextColor(
                     getColor(R.color.Yellow)
-                ) else if (corona.incidence >= 10 && corona.incidence < 25) textView_inzidenz.setTextColor(
+                ) else if (corona.incidence >= 10 && corona.incidence < 25) textViewInzidenz.setTextColor(
                     getColor(R.color.Green)
-                ) else if (corona.incidence < 10) textView_inzidenz.setTextColor(getColor(R.color.DarkGreen)) else textView_inzidenz.setTextColor(
+                ) else if (corona.incidence < 10) textViewInzidenz.setTextColor(getColor(R.color.DarkGreen)) else textViewInzidenz.setTextColor(
                     getColor(R.color.Gray)
                 )
             }
@@ -174,8 +209,8 @@ class MainActivity : AppCompatActivity() {
          * @param decimalPoints ist die Anzahl der Nachkommastellen, auf die gerundet werden soll.
          */
         fun round(value: Double, decimalPoints: Int): Double {
-            val d = Math.pow(10.0, decimalPoints.toDouble())
-            return Math.round(value * d) / d
+            val d = 10.0.pow(decimalPoints.toDouble())
+            return (value * d).roundToInt() / d
         }
     }
 }

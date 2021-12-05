@@ -1,14 +1,10 @@
 package de.luki2811.dev.inzidenzencheck
 
 import android.content.Context
-import de.luki2811.dev.inzidenzencheck.Datein
-import de.luki2811.dev.inzidenzencheck.Corona
-import de.luki2811.dev.inzidenzencheck.MainActivity
 import org.json.JSONObject
-import java.lang.NullPointerException
 import java.util.*
 
-class Corona(str: String, type: Int, context: Context?) {
+class Corona(str: String, type: Int, context: Context) {
     var location: String? = null
     var incidence = 0.0
 

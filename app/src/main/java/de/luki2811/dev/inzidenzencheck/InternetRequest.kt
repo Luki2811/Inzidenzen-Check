@@ -1,6 +1,7 @@
 package de.luki2811.dev.inzidenzencheck
 
 import android.content.Context
+import android.widget.Toast
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedInputStream
@@ -11,27 +12,32 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import kotlin.system.exitProcess
 
-class InternetRequest internal constructor(var url: URL, var context: Context, var fileName: String) :
+class InternetRequest internal constructor(private var url: URL, private var context: Context, private var fileName: String) :
     Thread() {
-    var jsonObject: JSONObject? = null
+    private var jsonObject: JSONObject? = null
 
     override fun run() {
         jsonObject = getJSONfromURL(url)
         val file = Datein(fileName)
+        if (jsonObject == null){
+            Toast.makeText(context, context.getString(R.string.error_cant_load_data), Toast.LENGTH_LONG).show()
+            return
+        }
         file.writeInFile(jsonObject.toString(), context)
     }
 
     companion object {
         fun getJSONfromURL(url: URL?): JSONObject? {
             var jsonObject: JSONObject? = null
-            var urlConnection: URLConnection? = null
+            val urlConnection: URLConnection
             try {
                 urlConnection = url!!.openConnection()
             } catch (e: IOException) {
                 e.printStackTrace()
+                return null
             }
             try {
-                BufferedInputStream(urlConnection!!.getInputStream()).use { `in` ->
+                BufferedInputStream(urlConnection.getInputStream()).use { `in` ->
                     val scanner = Scanner(`in`, StandardCharsets.UTF_8.name())
                     jsonObject = JSONObject(scanner.useDelimiter("//Z").next())
                 }
@@ -41,7 +47,6 @@ class InternetRequest internal constructor(var url: URL, var context: Context, v
                 e.printStackTrace()
             } catch (e: NullPointerException) {
                 e.printStackTrace()
-                System.err.println("URL konnte nicht gefunden werden")
                 exitProcess(-1)
             }
             return jsonObject

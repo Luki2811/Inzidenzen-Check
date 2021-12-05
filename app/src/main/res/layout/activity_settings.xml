@@ -103,11 +103,12 @@
                 android:layout_height="match_parent"
                 android:text="@string/settings" />
 
-            <Switch
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/settings_switch_0"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="false"
+                app:useMaterialThemeColors="true"
                 android:text="@string/settings_loadOldRequest" />
 
             <TextView
